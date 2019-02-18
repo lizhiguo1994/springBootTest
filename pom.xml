@@ -45,6 +45,13 @@
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/sshtools/j2ssh-core -->
+		<dependency>
+			<groupId>sshtools</groupId>
+			<artifactId>j2ssh-core</artifactId>
+			<version>0.2.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
