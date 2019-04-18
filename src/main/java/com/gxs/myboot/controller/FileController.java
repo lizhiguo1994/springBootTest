@@ -17,6 +17,12 @@ public class FileController {
         return FileUtil.get("wallet_server_info.log");
     }
 
+    @RequestMapping("/wallet_web")
+    public String walletWeb(){
+        logger.info("请求了/wallet_web");
+        return FileUtil.get("payment_wallet_info.log");
+    }
+
     @RequestMapping("/pay")
     public String pay(){
         logger.info("请求了/pay");

@@ -6,11 +6,19 @@ import com.sshtools.j2ssh.authentication.PasswordAuthenticationClient;
 import com.sshtools.j2ssh.sftp.SftpFile;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class FileUtil {
     public static void main(String[] args){
-        System.out.println("最终返回：" + get("wallet_server_info.log"));
+        //System.out.println("最终返回：" + get("wallet_server_info.log"));
+        //红包金额
+        BigDecimal redPacketAmount =  new BigDecimal(1.00);
+        //红包数量
+        int redPacketNum = 3;
+        BigDecimal receiveAmountBack = redPacketAmount.divide(new BigDecimal(redPacketNum), RoundingMode.HALF_UP);
+        System.out.println(receiveAmountBack);
     }
 
 
@@ -20,39 +28,59 @@ public class FileUtil {
      */
     public static void addFile(String fileName) {
         SshClient client=new SshClient();
+        String server_ip = "";
+        String username = "";
+        String password = "";
+        String path = "";
+
+        if ("wallet_server_info.log".equals(fileName)){
+            server_ip = "192.168.162.175";
+            username = "tempuser";
+            password = "tempuser123";
+            path = "/hy/logs/wallet_server/";
+        }
+        if ("payment_wallet_info.log".equals(fileName)){
+            server_ip = "192.168.162.173";
+            username = "tempuser";
+            password = "tempuser123";
+            path = "/hy/logs/payment_wallet/";
+        }
+        if ("payment_server_info.log".equals(fileName)){
+            server_ip = "192.168.162.175";
+            username = "tempuser";
+            password = "tempuser123";
+            path = "/hy/logs/payment_server/";
+        }
+
+
+
         try{
-            client.connect("192.168.162.175");
+            client.connect(server_ip);
             //设置用户名和密码
             PasswordAuthenticationClient pwd = new PasswordAuthenticationClient();
-            pwd.setUsername("tempuser");
-            pwd.setPassword("tempuser123");
+            pwd.setUsername(username);
+            pwd.setPassword(password);
             int result=client.authenticate(pwd);
             if(result== AuthenticationProtocolState.COMPLETE){//如果连接完成
                 System.out.println("==============="+result);
-                String path = "wallet_server";
-                if (!"wallet_server_info.log".equals(fileName)){
-                    path = "payment_server";
-                }
-                List<SftpFile> list = client.openSftpClient().ls("/hy/logs/"+path);
+                List<SftpFile> list = client.openSftpClient().ls(path);
                 for (SftpFile f : list) {
-                    System.out.println(f.getFilename());
-                    System.out.println(f.getAbsolutePath());
+//                    System.out.println(f.getFilename());
+//                    System.out.println(f.getAbsolutePath());
                     if(f.getFilename().equals(fileName)){
                         clearInfoForFile("E:/serverLog/"+f.getFilename());
                         OutputStream os = new FileOutputStream("E:/serverLog/"+f.getFilename());
-                        client.openSftpClient().get("/hy/logs/"+path+"/"+fileName, os);
+                        client.openSftpClient().get(path + fileName, os);
                         //以行为单位读取文件start
                         File file = new File("E:/serverLog/"+fileName);
                         BufferedReader reader = null;
                         try {
                             System.out.println("以行为单位读取文件内容，一次读一整行：");
                             reader = new BufferedReader(new FileReader(file));
-                            String tempString = null;
                             int line = 1;//行号
                             //一次读入一行，直到读入null为文件结束
-                            while ((tempString = reader.readLine()) != null) {
+                            while ((reader.readLine()) != null) {
                                 //显示行号
-                                System.out.println("line " + line + ": " + tempString);
                                 line++;
                             }
                             reader.close();
@@ -76,7 +104,10 @@ public class FileUtil {
     }
 
 
-    // 清空已有的文件内容，以便下次重新写入新的内容
+    /**
+     * 清空已有的文件内容，以便下次重新写入新的内容
+     * @param fileName
+     */
     public static void clearInfoForFile(String fileName) {
         File file =new File(fileName);
         try {
@@ -93,6 +124,11 @@ public class FileUtil {
     }
 
 
+    /**
+     * 从本地文件读取后10行数据
+     * @param fileName
+     * @return
+     */
     public static String get(String fileName){
         addFile(fileName);
         fileName = "E:/serverLog/" + fileName;
@@ -123,7 +159,12 @@ public class FileUtil {
         return "";
     }
 
-    // 文件内容的总行数。
+    /**
+     * 获取文件总行数
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
     static int getTotalLines(String fileName) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(
                 new FileInputStream(fileName)));
@@ -139,27 +180,5 @@ public class FileUtil {
         return lines;
     }
 
-    /**
-     * 删除单个文件
-     *
-     * @param fileName
-     *            要删除的文件的文件名
-     * @return 单个文件删除成功返回true，否则返回false
-     */
-    public static boolean deleteFile(String fileName) {
-        File file = new File(fileName);
-        // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
-        if (file.exists() && file.isFile()) {
-            if (file.delete()) {
-                System.out.println("删除单个文件" + fileName + "成功！");
-                return true;
-            } else {
-                System.out.println("删除单个文件" + fileName + "失败！");
-                return false;
-            }
-        } else {
-            System.out.println("删除单个文件失败：" + fileName + "不存在！");
-            return false;
-        }
-    }
+
 }

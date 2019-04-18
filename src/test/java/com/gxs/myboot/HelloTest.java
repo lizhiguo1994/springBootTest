@@ -30,8 +30,18 @@ public class HelloTest {
 
     @Test
     public void getHello() throws Exception{
-        mvc.perform(MockMvcRequestBuilders.get("/hello").accept(MediaType.APPLICATION_JSON))
+     /*   mvc.perform(MockMvcRequestBuilders.get("/hello").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Hello World")));
+*/
+        com.gxs.myboot.controller.Test test = new com.gxs.myboot.controller.Test();
+
+        if (test == null){
+            System.out.println("test==null");
+        }else {
+            System.out.println("test!=null");
+            System.out.println("test!=null" + test.getName());
+
+        }
     }
 }
